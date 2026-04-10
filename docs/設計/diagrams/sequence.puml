@@ -1,0 +1,43 @@
+@startuml
+actor ユーザー as browser
+participant "ブラウザ" as browser
+participant "サーバー" as server
+participant "データベース" as db
+
+user -> browser: 新規投稿ページを開く
+browser -> server: GET /threads/new
+
+server -> server: ログインチェック
+
+alt 未ログイン
+  server --> browser: 302 /login
+  browser --> user: ログイン画面表示
+else ログイン済み
+  server --> browser: HTML返却
+  browser --> user: 投稿フォーム表示
+end
+
+user -> browser: タイトル・本文を入力して送信
+browser -> server: POST /threads\n{title, content}
+
+server -> server: ログインチェック
+server -> server: 入力値バリデーション
+
+alt バリデーションエラー
+  server --> browser: エラー付きHTML
+  browser --> user: エラーメッセージ表示
+else 正常
+  server -> db: INSERT INTO threads
+  db --> server: 保存結果
+
+  server --> browser: 302 /threads
+  browser -> server: GET /threads
+
+  server -> db: スレッド一覧取得
+  db --> server: スレッド一覧
+
+  server --> browser: HTML返却
+  browser --> user: 一覧画面表示
+end
+
+@enduml

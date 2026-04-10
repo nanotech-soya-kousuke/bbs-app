@@ -1,0 +1,68 @@
+@startuml
+
+class User {
+  - id: int
+  - name: string
+  - email: string
+  - passwordHash: string
+  - createdAt: datetime
+  + getName(): string
+}
+
+class UserManager{
+  + register(name, email, password): User
+  + login(email, password): User
+  + logout(user): void
+}
+
+class SearchManager{
+  + searchThreadTitle(keyword): Thread[]
+  + searchThreadUser(userName): Thread[]
+}
+
+class Thread {
+  - id: int
+  - title: string
+  - content: string
+  - userId: int
+  - createdAt: datetime
+  + create(user, title, content): Thread
+  + delete(user): void
+  + getResponses(limit=500): Response[]
+  + addReaction(user, reaction): void
+}
+
+class Response {
+  - id: int
+  - content: string
+  - threadId: int
+  - userId: int
+  - createdAt: datetime
+  + create(user, threadId ,content): Response
+  + delete(user): void
+  + addReaction(user, reaction): void
+}
+
+class Admin {
+  + updateUser(user): void
+  + deleteUser(userId): void
+  + manageThread(thread): void
+  + manageResponse(response): void
+}
+
+class Reaction {
+  - id: int
+  - type: string
+  - userId: int
+  - createdAt: datetime
+}
+
+User --> Thread : 作成
+Thread --> Response
+Thread --> Reaction : リアクション
+Response --> Reaction : リアクション
+Admin --|> User
+UserManager --> User
+SearchManager --> Thread
+SearchManager --> User
+@enduml

@@ -1,0 +1,33 @@
+@startuml bbs_usecase
+left to right direction
+
+actor "一般ユーザー" as user
+actor "管理者" as admin
+
+rectangle "掲示板システム" {
+  usecase "ユーザー登録" as UC1
+  usecase "ログイン/ログアウト" as UC2
+  usecase "スレッド/レスポンス一覧閲覧" as UC3
+  usecase "スレッド/レスポンス作成" as UC4
+  usecase "スレッド検索(キーワード・ユーザー名)" as UC5
+  usecase "自身の投稿削除" as UC6
+  usecase "アンカー投稿" as UC7
+  usecase "リアクション" as UC8
+  usecase "ユーザー管理(編集・削除)" as UC9
+  usecase "投稿管理(追加・編集・削除)" as UC10
+}
+
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+user --> UC5
+user --> UC6
+user --> UC7
+user --> UC8
+
+admin --> UC1
+admin --> UC3
+admin --> UC9
+admin --> UC10
+@enduml
