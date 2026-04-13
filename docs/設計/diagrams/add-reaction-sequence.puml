@@ -1,0 +1,12 @@
+@startuml
+actor ユーザー as user
+participant "Post" as post
+participant "Reaction" as reaction
+
+user -> post: リアクション要求(user, type)
+post -> post: addReaction(user, type)
+post -> reaction: Reaction(user, post, type)
+reaction --> post: 生成完了
+post --> user: リアクション追加完了
+
+@enduml

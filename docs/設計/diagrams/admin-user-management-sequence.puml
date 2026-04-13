@@ -1,0 +1,15 @@
+@startuml
+actor 管理者 as admin
+participant "Admin" as ac
+
+== ユーザー編集 ==
+admin -> ac: ユーザー編集要求(user, 更新情報)
+ac -> ac: updateUser(user)
+ac --> admin: 編集完了
+
+== ユーザー削除 ==
+admin -> ac: ユーザー削除要求(userId)
+ac -> ac: deleteUser(userId)
+ac --> admin: 削除完了
+
+@enduml

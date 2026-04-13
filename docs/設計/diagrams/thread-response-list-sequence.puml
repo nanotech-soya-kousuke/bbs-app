@@ -1,0 +1,19 @@
+@startuml
+actor ユーザー as user
+participant "Thread" as thread
+participant "Response" as response
+
+== スレッド一覧閲覧 ==
+user -> thread: スレッド一覧要求
+thread -> thread
+thread --> user: スレッド一覧
+
+== レスポンス一覧閲覧 ==
+user -> thread: レスポンス一覧要求(threadId)
+thread -> thread: getResponses(limit=500): Response[]
+thread --> response: レスポンス配列取得
+response --> thread
+thread --> user: レスポンス一覧
+
+
+@enduml

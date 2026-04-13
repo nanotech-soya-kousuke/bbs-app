@@ -1,0 +1,15 @@
+@startuml
+actor ユーザー as user
+participant "Post" as post
+
+user -> post: 削除要求(user)
+post -> post: delete(user)
+
+alt 投稿者本人の場合
+    post -> post: 投稿削除
+    post --> user: 削除成功
+else 投稿者以外の場合
+    post --> user: 削除失敗
+end
+
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+actor ユーザー as user
+participant "UserManager" as um
+participant "User" as uc
+
+== ログイン ==
+user -> um: ログイン(email, password)
+um -> um: login(email, password): User
+um --> uc: ユーザー認証
+uc --> um: ユーザー情報取得
+um --> user: ログイン完了(user)
+
+== ログアウト ==
+user -> um: ログアウト(user)
+um -> um: logout(user): void
+um --> user: ログアウト完了
+
+@enduml

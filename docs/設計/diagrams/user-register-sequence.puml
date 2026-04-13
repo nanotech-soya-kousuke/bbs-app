@@ -1,0 +1,11 @@
+@startuml
+actor ユーザー as user
+participant "UserManager" as um
+participant "User" as uc
+
+user -> um: ユーザー登録(name, email, password)
+um -> um: register(name, email, password): User
+um --> uc: create
+uc --> um
+
+@enduml

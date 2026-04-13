@@ -11,10 +11,9 @@ rectangle "掲示板システム" {
   usecase "スレッド/レスポンス作成" as UC4
   usecase "スレッド検索(キーワード・ユーザー名)" as UC5
   usecase "自身の投稿削除" as UC6
-  usecase "アンカー投稿" as UC7
   usecase "リアクション" as UC8
   usecase "ユーザー管理(編集・削除)" as UC9
-  usecase "投稿管理(追加・編集・削除)" as UC10
+  usecase "投稿管理(編集・削除)" as UC10
 }
 
 user --> UC1
@@ -23,7 +22,6 @@ user --> UC3
 user --> UC4
 user --> UC5
 user --> UC6
-user --> UC7
 user --> UC8
 
 admin --> UC1

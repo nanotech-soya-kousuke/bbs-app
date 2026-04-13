@@ -20,49 +20,47 @@ class SearchManager{
   + searchThreadUser(userName): Thread[]
 }
 
-class Thread {
+abstract class Post {
   - id: int
-  - title: string
   - content: string
   - userId: int
   - createdAt: datetime
-  + create(user, title, content): Thread
+  + update(title, content): void
   + delete(user): void
-  + getResponses(limit=500): Response[]
   + addReaction(user, reaction): void
 }
 
+class Thread {
+  - title: string
+  + create(user, title, content): Thread
+  + getResponses(limit=500): Response[]
+}
+
 class Response {
-  - id: int
-  - content: string
-  - threadId: int
-  - userId: int
-  - createdAt: datetime
+  - thread: Thread
   + create(user, threadId ,content): Response
-  + delete(user): void
-  + addReaction(user, reaction): void
 }
 
 class Admin {
   + updateUser(user): void
   + deleteUser(userId): void
-  + manageThread(thread): void
-  + manageResponse(response): void
+  + updatePost(post, content): void
+  + deletePost(post): void
 }
 
 class Reaction {
   - id: int
   - type: string
-  - userId: int
+  - user: User
+  - post: Post
   - createdAt: datetime
+  + Reaction(user, post, type): Reaction
 }
 
-User --> Thread : 作成
-Thread --> Response
-Thread --> Reaction : リアクション
-Response --> Reaction : リアクション
+User ..> Post : 作成
+Post --> Reaction : リアクション
+Thread --|> Post
+Response --|> Post
 Admin --|> User
-UserManager --> User
-SearchManager --> Thread
-SearchManager --> User
+UserManager ..> User : 作成
 @enduml

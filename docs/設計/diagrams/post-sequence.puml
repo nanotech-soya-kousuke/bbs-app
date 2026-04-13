@@ -1,5 +1,5 @@
 @startuml
-actor ユーザー as browser
+actor ユーザー as user
 participant "ブラウザ" as browser
 participant "サーバー" as server
 participant "データベース" as db

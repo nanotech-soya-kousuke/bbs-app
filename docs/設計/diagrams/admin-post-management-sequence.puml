@@ -1,0 +1,28 @@
+@startuml
+actor 管理者 as admin
+participant "Admin" as ac
+participant "Post" as post
+
+== 投稿編集 ==
+admin -> ac: 投稿編集要求(post, content)
+
+ac -> ac: updatePost(post, content)
+activate ac
+ac -> post: update(null, content): void
+post --> ac: 更新完了
+deactivate ac
+
+ac --> admin: 編集完了
+
+== 投稿削除 ==
+admin -> ac: 投稿削除要求(post)
+ac -> ac: deletePost(post)
+
+activate ac
+ac -> post: delete(user): void
+post --> ac: 削除完了
+deactivate ac
+
+ac --> admin: 削除完了
+
+@enduml
