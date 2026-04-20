@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/Post.php';
-require_once __DIR__ . '/../lib/idiorm.php';
+require_once __DIR__ . '/Database.php';
 
 class Thread extends Post
 {
@@ -42,7 +42,6 @@ class Thread extends Post
 
     public static function getAllWithStats(): array
     {
-        // idiorm はJOIN/GROUP BYが苦手なため raw_query を使用
         $rows = ORM::raw_execute(
             "SELECT
                 t.id,
