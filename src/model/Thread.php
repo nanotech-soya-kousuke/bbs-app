@@ -89,6 +89,28 @@ class Thread extends Post
         }
         return $threads;
     }
+    public static function findById(int $id): ?self
+    {
+        $pdo  = ORM::get_db();
+        $stmt = $pdo->prepare(
+            "SELECT t.id, t.title, t.content, t.user_id, t.created_at, u.name AS user_name
+            FROM threads t
+            JOIN users u ON t.user_id = u.id
+            WHERE t.id = :id"
+        );
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        if (!$row) return null;
+
+        return new self(
+            (int)$row['id'],
+            $row['title'],
+            $row['content'],
+            (int)$row['user_id'],
+            $row['created_at'],
+            $row['user_name']
+        );
+    }
     public $responseCount = 0;
 }
