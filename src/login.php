@@ -1,13 +1,6 @@
 <?php
+require_once 'model/UserManager.php';
 session_start();
-
-$dsn = 'pgsql:host=db;port=5432;dbname=bbs_app';
-$user = 'user';
-$password = 'password';
-
-$pdo = new PDO($dsn, $user, $password, [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-]);
 
 $email = '';
 $errors = [];
@@ -15,24 +8,14 @@ $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $email = $_POST['email'] ?? '';
-    $password_input = $_POST['password'] ?? '';
 
-    if ($email === '' || $password_input === '') {
-        $errors[] = 'メールアドレスまたはパスワードが正しくありません';
-    }
-
-    if (empty($errors)) {
-        $stmt = $pdo->prepare("SELECT id, password_hash FROM users WHERE email = :email");
-        $stmt->execute([':email' => $email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($user && password_verify($password_input, $user['password_hash'])) {
-            $_SESSION['user_id'] = $user['id'];
-            header('Location: index.php');
-            exit;
-        } else {
-            $errors[] = 'メールアドレスまたはパスワードが正しくありません';
-        }
+    $mang = new UserManager();
+    try {
+        $user = $mang->login($_POST['email'] ?? '', $_POST['password'] ?? '');
+        header('Location: index.php');
+        exit;
+    } catch (InvalidArgumentException $e) {
+        $errors = explode("\n", $e->getMessage());
     }
 }
 ?>
@@ -46,6 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
+
+    <a href="index.php">← スレッド一覧に戻る</a>
 
     <h2>ログイン</h2>
 

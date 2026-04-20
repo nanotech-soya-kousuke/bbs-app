@@ -1,9 +1,8 @@
 <?php
+require_once 'model/UserManager.php';
 session_start();
 
-$_SESSION = [];
-
-session_destroy();
-
+$mang = new UserManager();
+$mang->logout();
 header('Location: login.php');
 exit;
