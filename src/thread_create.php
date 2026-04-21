@@ -6,13 +6,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$dsn = 'pgsql:host=db;port=5432;dbname=bbs_app';
-$db_user = 'user';
-$db_password = 'password';
-
-$pdo = new PDO($dsn, $db_user, $db_password, [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-]);
+require_once __DIR__ . '/model/Thread.php';
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -34,27 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $title   = $_POST['title']   ?? '';
         $content = $_POST['content'] ?? '';
 
-        if ($title === '') {
-            $errors[] = 'タイトルは必須です';
-        } elseif (mb_strlen($title, 'UTF-8') > 200) {
-            $errors[] = 'タイトルは200文字以内で入力してください';
-        }
-
-        if ($content === '') {
-            $errors[] = '本文は必須です';
-        }
+        $errors = Thread::validate($title, $content);
     }
     if (empty($errors)) {
-        $stmt = $pdo->prepare("
-            INSERT INTO threads (title, content, user_id)
-            VALUES (:title, :content, :user_id)
-        ");
-        $stmt->execute([
-            ':title'   => $title,
-            ':content' => $content,
-            ':user_id' => $_SESSION['user_id'],
-        ]);
-
+        Thread::create($_SESSION['user_id'], $title, $content);
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         header('Location: index.php');
         exit;
