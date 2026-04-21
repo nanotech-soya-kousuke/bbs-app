@@ -31,6 +31,21 @@ class Thread extends Post
         return $this->userName;
     }
 
+        public static function validate(string $title, string $content): array
+    {
+        $errors = [];
+        if (trim($title) === '' || preg_match('/^[\s　]+$/u', $title)) {
+            $errors[] = 'タイトルは必須です';
+        } elseif (mb_strlen($title, 'UTF-8') > 200) {
+            $errors[] = 'タイトルは200文字以内で入力してください';
+        }
+
+        if (trim($content) === '' || preg_match('/^[\s　]+$/u', $content)) {
+            $errors[] = '本文は必須です';
+        }
+        return $errors;
+    }
+    
     public static function create(int $userId, string $title, string $content): self
     {
         $record = ORM::for_table('threads')->create();
