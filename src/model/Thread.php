@@ -100,32 +100,10 @@ class Thread extends Post
                 クエリの多重実行を修正しました。
         */
         /*
-        @soya:
-        元のコード
-        $rows = ORM::raw_execute(
-            "SELECT
-                t.id,
-                t.title,
-                t.content,
-                t.user_id,
-                t.created_at,
-                u.name AS user_name,
-                COUNT(r.id) AS response_count
-            FROM threads t
-            JOIN users u ON t.user_id = u.id
-            LEFT JOIN responses r ON r.thread_id = t.id
-            GROUP BY t.id, t.title, t.content, t.user_id, t.created_at, u.name
-            ORDER BY t.created_at DESC"
-        );
-        */
-
-        /*
             @kanai:
                 PDO を取得して、PDOを介して 直接SQLを実行していますが、ORMのraw_queryを使うようにしてください。
                 基本的にプロジェクトではORMを使う方針なので、ORMを使わないコードは極力書かないようにしてください。（統一感）
-
-            // 実装例（動作未確認）
-            */
+         */
         $rows = ORM::for_table('threads')
             ->join('users', ['threads.user_id', '=', 'users.id'])
             ->left_outer_join('responses', ['responses.thread_id', '=', 'threads.id'])
@@ -188,41 +166,6 @@ class Thread extends Post
             ->group_by('users.name')
             ->order_by_desc('threads.created_at')
             ->find_many();
-        @soya:
-        元のコード
-        $pdo  = ORM::get_db();
-
-        $rows = $pdo->query(
-            "SELECT
-                t.id,
-                t.title,
-                t.content,
-                t.user_id,
-                t.created_at,
-                u.name AS user_name,
-                COUNT(r.id) AS response_count
-            FROM threads t
-            JOIN users u ON t.user_id = u.id
-            LEFT JOIN responses r ON r.thread_id = t.id
-            GROUP BY t.id, t.title, t.content, t.user_id, t.created_at, u.name
-            ORDER BY t.created_at DESC"
-        )->fetchAll(PDO::FETCH_ASSOC);
-
-
-        $threads = [];
-        foreach ($rows as $row) {
-            $thread = new self(
-                (int)$row['id'],
-                $row['title'],
-                $row['content'],
-                (int)$row['user_id'],
-                $row['created_at'],
-                $row['user_name']
-            );
-            $thread->responseCount = (int)$row['response_count'];
-            $threads[] = $thread;
-        }
-        return $threads;
      */
     public static function findById(int $id): ?self
     {
@@ -232,18 +175,6 @@ class Thread extends Post
                 単純なSQLなので、ORM(idiorm) のクエリビルダーで取得してみてください。
                 SQLインジェクション対策にプリペアードステートメントを使えてるのはGOODです。
         */
-        /*
-        @soya: 元のコード
-        $pdo  = ORM::get_db();
-        $stmt = $pdo->prepare(
-            "SELECT t.id, t.title, t.content, t.user_id, t.created_at, u.name AS user_name
-            FROM threads t
-            JOIN users u ON t.user_id = u.id
-            WHERE t.id = :id"
-        );
-        $stmt->execute([':id' => $id]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-*/
         $row = ORM::for_table('threads')
             ->table_alias('t')
             ->select('t.id')
