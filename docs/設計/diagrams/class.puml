@@ -12,7 +12,8 @@ class User {
 class UserManager{
   + register(name, email, password): User
   + login(email, password): User
-  + logout(user): void
+  + logout(): void
+  - checkValidation(name, email, password): array
 }
 
 class SearchManager{
@@ -25,6 +26,10 @@ abstract class Post {
   - content: string
   - userId: int
   - createdAt: datetime
+  + getId(): int
+  + getContent(): string
+  + getUserId(): int
+  + getCreatedAt(): string
   + update(title, content): void
   + delete(user): void
   + addReaction(user, reaction): void
@@ -32,13 +37,20 @@ abstract class Post {
 
 class Thread {
   - title: string
+  - userName: string
+  + responseCount: int
   + create(user, title, content): Thread
-  + getResponses(limit=500): Response[]
+  + getTitle(): string
+  + getUserName(): string
+  + getAllWithStats(): array
+  + findById(id): self
 }
 
 class Response {
-  - thread: Thread
+  - userName: string
   + create(user, threadId ,content): Response
+  + getUserName(): string
+  + getByThreadId(threadId, limit = 500): array
 }
 
 class Admin {

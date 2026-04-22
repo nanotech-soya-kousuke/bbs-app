@@ -41,10 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $content = trim($_POST['content'] ?? '');
-        if ($content === '') {
-            $errors[] = 'コメントを入力してください';
-        }
+        $errors = ($content);
     }
 
     if (empty($errors)) {
@@ -73,7 +70,7 @@ $responses = Response::getByThreadId($thread_id);
 
     <h2><?= htmlspecialchars($thread->getTitle(), ENT_QUOTES, 'UTF-8') ?></h2>
     <p>
-        投稿者: <?= htmlspecialchars($thread->getUserName(), ENT_QUOTES, 'UTF-8') ?><br>
+        投稿者: <?= htmlspecialchars($thread->getAuthorName(), ENT_QUOTES, 'UTF-8') ?><br>
         投稿日時: <?= date('Y/m/d H:i', strtotime($thread->getCreatedAt())) ?>
     </p>
     <p><?= nl2br(htmlspecialchars($thread->getContent(), ENT_QUOTES, 'UTF-8')) ?></p>
@@ -89,7 +86,7 @@ $responses = Response::getByThreadId($thread_id);
             <div id="res-<?= $res->getId() ?>" style="margin-bottom:16px; padding:8px; border:1px solid #ccc;">
                 <strong>
                     <?= $i + 1 ?>番:
-                    <?= htmlspecialchars($res->getUserName(), ENT_QUOTES, 'UTF-8') ?>
+                    <?= htmlspecialchars($res->getAuthorName(), ENT_QUOTES, 'UTF-8') ?>
                 </strong>
                 <span style="color:#888; margin-left:8px;">
                     <?= date('Y/m/d H:i', strtotime($res->getCreatedAt())) ?>

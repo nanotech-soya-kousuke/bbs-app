@@ -15,6 +15,16 @@ class Response extends Post
         return $this->userName;
     }
 
+    public static function validateResponse(string $content): array
+    {
+        $errors = [];
+        $content = trim($_POST['content'] ?? '');
+        if ($content === '') {
+            $errors[] = 'コメントを入力してください';
+        }
+        return $errors;
+    }
+
     public static function create(int $userId, int $threadId, string $content): self
     {
         $record            = ORM::for_table('responses')->create();
@@ -33,6 +43,7 @@ class Response extends Post
 
     public static function getByThreadId(int $threadId, int $limit = 500): array
     {
+        /*
         $pdo  = ORM::get_db();
         $stmt = $pdo->prepare(
             "SELECT
@@ -51,6 +62,20 @@ class Response extends Post
         $stmt->bindValue(':limit',     $limit,    PDO::PARAM_INT);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        */
+        $rows = ORM::for_table('responses')
+            ->table_alias('r')
+            ->select('r.id')
+            ->select('r.content')
+            ->select('r.user_id')
+            ->select('r.created_at')
+            ->select('u.name', 'user_name')
+            ->join('users', array('r.user_id', '=', 'u.id'), 'u')
+            ->where('r.thread_id', $threadId)
+            ->order_by_asc('r.created_at')
+            ->limit($limit)
+            ->find_array();
+
 
         return array_map(fn($row) => new self(
             (int)$row['id'],

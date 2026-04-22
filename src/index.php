@@ -40,7 +40,7 @@ $threads      = Thread::getAllWithStats();
                 </a>
             </h3>
             <p>
-                投稿者: <?= htmlspecialchars($thread->getUserName(), ENT_QUOTES, 'UTF-8') ?><br>
+                投稿者: <?= htmlspecialchars($thread->getAuthorName(), ENT_QUOTES, 'UTF-8') ?><br>
                 投稿日時: <?= date('Y/m/d H:i', strtotime($thread->getCreatedAt())) ?><br>
                 コメント数: <?= $thread->responseCount ?>
             </p>

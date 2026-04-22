@@ -25,13 +25,18 @@ class Thread extends Post
             作成者なのか、最終更新者なのか など。具体的な名前を付けるようにしてみてください。
             例)
                 getUserName -> getAuthorName / getOwnerName  など
+
+        @soya:
+            メソッド名を
+                getUserName -> getAuthorName
+            に変更しました。
      */
-    public function getUserName(): string
+    public function getAuthorName(): string
     {
         return $this->userName;
     }
 
-        public static function validate(string $title, string $content): array
+    public static function validate(string $title, string $content): array
     {
         $errors = [];
         if (trim($title) === '' || preg_match('/^[\s　]+$/u', $title)) {
@@ -45,7 +50,7 @@ class Thread extends Post
         }
         return $errors;
     }
-    
+
     public static function create(int $userId, string $title, string $content): self
     {
         $record = ORM::for_table('threads')->create();
@@ -86,6 +91,9 @@ class Thread extends Post
             @kanai:
                 同じクエリを2回実行している。不具合？
         */
+        /*
+        @soya:
+        元のコード
         $rows = ORM::raw_execute(
             "SELECT
                 t.id,
@@ -101,16 +109,18 @@ class Thread extends Post
             GROUP BY t.id, t.title, t.content, t.user_id, t.created_at, u.name
             ORDER BY t.created_at DESC"
         );
-        
+        */
+
         /*
             @kanai:
                 PDO を取得して、PDOを介して 直接SQLを実行していますが、ORMのraw_queryを使うようにしてください。
                 基本的にプロジェクトではORMを使う方針なので、ORMを使わないコードは極力書かないようにしてください。（統一感）
 
             // 実装例（動作未確認）
-            $rows = ORM::for_table('threads')
-                ->raw_query(
-                    "SELECT
+            */
+        $rows = ORM::for_table('threads')
+            ->raw_query(
+                "SELECT
                         t.id,
                         t.title,
                         t.content,
@@ -123,22 +133,21 @@ class Thread extends Post
                     LEFT JOIN responses r ON r.thread_id = t.id
                     GROUP BY t.id, t.title, t.content, t.user_id, t.created_at, u.name
                     ORDER BY t.created_at DESC"
-                )
-                ->find_many();
+            )
+            ->find_many();
 
-            foreach ($rows as $row) {
-                $thread = new self(
-                    $row->id,
-                    $row->title,
-                    $row->content,
-                    $row->user_id,
-                    $row->created_at,
-                    $row->user_name
-                );
-                $thread->responseCount = $row->response_count;
-                $threads[] = $thread;
-            }
-        */
+        foreach ($rows as $row) {
+            $thread = new self(
+                $row->id,
+                $row->title,
+                $row->content,
+                $row->user_id,
+                $row->created_at,
+                $row->user_name
+            );
+            $thread->responseCount = $row->response_count;
+            $threads[] = $thread;
+        }
 
 
         /*
@@ -147,25 +156,29 @@ class Thread extends Post
                 可読性が上がりますし、SQLインジェクションのリスクも減ります。
 
                 例)
-                $rows = ORM::for_table('threads')
-                    ->join('users', ['threads.user_id', '=', 'users.id'])
-                    ->left_outer_join('responses', ['responses.thread_id', '=', 'threads.id'])
-                    ->select('threads.id')
-                    ->select('threads.title')
-                    ->select('threads.content')
-                    ->select('threads.user_id')
-                    ->select('threads.created_at')
-                    ->select('users.name', 'user_name')
-                    ->select_expr('COUNT(responses.id)', 'response_count')
-                    ->group_by('threads.id')
-                    ->group_by('threads.title')
-                    ->group_by('threads.content')
-                    ->group_by('threads.user_id')
-                    ->group_by('threads.created_at')
-                    ->group_by('users.name')
-                    ->order_by_desc('threads.created_at')
-                    ->find_many();
-        */
+                */
+        $rows = ORM::for_table('threads')
+            ->join('users', ['threads.user_id', '=', 'users.id'])
+            ->left_outer_join('responses', ['responses.thread_id', '=', 'threads.id'])
+            ->select('threads.id')
+            ->select('threads.title')
+            ->select('threads.content')
+            ->select('threads.user_id')
+            ->select('threads.created_at')
+            ->select('users.name', 'user_name')
+            ->select_expr('COUNT(responses.id)', 'response_count')
+            ->group_by('threads.id')
+            ->group_by('threads.title')
+            ->group_by('threads.content')
+            ->group_by('threads.user_id')
+            ->group_by('threads.created_at')
+            ->group_by('users.name')
+            ->order_by_desc('threads.created_at')
+            ->find_many();
+
+        /*
+        @soya:
+        元のコード
         $pdo  = ORM::get_db();
 
         $rows = $pdo->query(
@@ -183,6 +196,7 @@ class Thread extends Post
             GROUP BY t.id, t.title, t.content, t.user_id, t.created_at, u.name
             ORDER BY t.created_at DESC"
         )->fetchAll(PDO::FETCH_ASSOC);
+        */
 
         $threads = [];
         foreach ($rows as $row) {
@@ -201,13 +215,13 @@ class Thread extends Post
     }
     public static function findById(int $id): ?self
     {
-        
+
         /*
             kanai: 
                 単純なSQLなので、ORM(idiorm) のクエリビルダーで取得してみてください。
                 SQLインジェクション対策にプリペアードステートメントを使えてるのはGOODです。
         */
-
+        /*
         $pdo  = ORM::get_db();
         $stmt = $pdo->prepare(
             "SELECT t.id, t.title, t.content, t.user_id, t.created_at, u.name AS user_name
@@ -217,7 +231,18 @@ class Thread extends Post
         );
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
+*/
+        $row = ORM::for_table('threads')
+            ->table_alias('t')
+            ->select('t.id')
+            ->select('t.title')
+            ->select('t.content')
+            ->select('t.user_id')
+            ->select('t.created_at')
+            ->select('u.name', 'user_name')
+            ->join('users', array('t.user_id', '=', 'u.id'), 'u')
+            ->where('t.id', $id)
+            ->find_one();
         /* 
             kanai: 
                 コーディング規約は別途準備中ですが、基本的にif分の波括弧は省略しない方針でお願いします。
@@ -225,8 +250,9 @@ class Thread extends Post
                     return null;
                 }
         */
-        if (!$row) return null;
-
+        if (!$row) {
+            return null;
+        }
         return new self(
             (int)$row['id'],
             $row['title'],
@@ -237,6 +263,10 @@ class Thread extends Post
         );
     }
 
+    public static function getResourceCount()
+    {
+        
+    }
     /*
         @kanai:
             スレッド毎のレスポンス件数のプロパティかと思いますが、public だと クラス外から書き換えられる可能性があるため。
@@ -244,4 +274,7 @@ class Thread extends Post
             private にしたうえで、他プロパティと同じく getResponseCount を用意するのがよいです。
     */
     public $responseCount = 0;
+    /*
+    
+    */
 }
