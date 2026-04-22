@@ -6,6 +6,7 @@ class Thread extends Post
 {
     private $title;
     private $userName;
+    private $responseCount = 0;
 
     public function __construct($id, $title, $content, $userId, $createdAt, $userName = '')
     {
@@ -34,6 +35,11 @@ class Thread extends Post
     public function getAuthorName(): string
     {
         return $this->userName;
+    }
+
+    public function getResponseCount(): int
+    {
+        return $this->responseCount;
     }
 
     public static function validate(string $title, string $content): array
@@ -85,11 +91,13 @@ class Thread extends Post
             Stats が何を表すのかがわからないため、もう少し具体的な名前にしてください。
     
     */
-    public static function getAllWithStats(): array
+    public static function getAllWithResponseCount(int $limit = 50, int $offset = 0): array
     {
         /*
             @kanai:
                 同じクエリを2回実行している。不具合？
+            @soya:
+                クエリの多重実行を修正しました。
         */
         /*
         @soya:
@@ -119,44 +127,49 @@ class Thread extends Post
             // 実装例（動作未確認）
             */
         $rows = ORM::for_table('threads')
-            ->raw_query(
-                "SELECT
-                        t.id,
-                        t.title,
-                        t.content,
-                        t.user_id,
-                        t.created_at,
-                        u.name AS user_name,
-                        COUNT(r.id) AS response_count
-                    FROM threads t
-                    JOIN users u ON t.user_id = u.id
-                    LEFT JOIN responses r ON r.thread_id = t.id
-                    GROUP BY t.id, t.title, t.content, t.user_id, t.created_at, u.name
-                    ORDER BY t.created_at DESC"
-            )
+            ->join('users', ['threads.user_id', '=', 'users.id'])
+            ->left_outer_join('responses', ['responses.thread_id', '=', 'threads.id'])
+            ->select('threads.id')
+            ->select('threads.title')
+            ->select('threads.content')
+            ->select('threads.user_id')
+            ->select('threads.created_at')
+            ->select('users.name', 'user_name')
+            ->select_expr('COUNT(responses.id)', 'response_count')
+            ->group_by('threads.id')
+            ->group_by('threads.title')
+            ->group_by('threads.content')
+            ->group_by('threads.user_id')
+            ->group_by('threads.created_at')
+            ->group_by('users.name')
+            ->order_by_desc('threads.created_at')
+            ->limit($limit)
+            ->offset($offset)
             ->find_many();
 
+        $threads = [];
         foreach ($rows as $row) {
             $thread = new self(
-                $row->id,
-                $row->title,
-                $row->content,
-                $row->user_id,
-                $row->created_at,
-                $row->user_name
+                (int)$row['id'],
+                $row['title'],
+                $row['content'],
+                (int)$row['user_id'],
+                $row['created_at'],
+                $row['user_name']
             );
-            $thread->responseCount = $row->response_count;
+            $thread->responseCount = (int)$row['response_count'];
             $threads[] = $thread;
         }
+        return $threads;
+    }
 
 
-        /*
+    /*
              @kanai:
                 また、今回のような複雑なクエリは、raw_query でOKですが、簡単なクエリの場合はORMのクエリビルダを使うようにしてください。
                 可読性が上がりますし、SQLインジェクションのリスクも減ります。
 
                 例)
-                */
         $rows = ORM::for_table('threads')
             ->join('users', ['threads.user_id', '=', 'users.id'])
             ->left_outer_join('responses', ['responses.thread_id', '=', 'threads.id'])
@@ -175,8 +188,6 @@ class Thread extends Post
             ->group_by('users.name')
             ->order_by_desc('threads.created_at')
             ->find_many();
-
-        /*
         @soya:
         元のコード
         $pdo  = ORM::get_db();
@@ -196,7 +207,7 @@ class Thread extends Post
             GROUP BY t.id, t.title, t.content, t.user_id, t.created_at, u.name
             ORDER BY t.created_at DESC"
         )->fetchAll(PDO::FETCH_ASSOC);
-        */
+
 
         $threads = [];
         foreach ($rows as $row) {
@@ -212,7 +223,7 @@ class Thread extends Post
             $threads[] = $thread;
         }
         return $threads;
-    }
+     */
     public static function findById(int $id): ?self
     {
 
@@ -222,6 +233,7 @@ class Thread extends Post
                 SQLインジェクション対策にプリペアードステートメントを使えてるのはGOODです。
         */
         /*
+        @soya: 元のコード
         $pdo  = ORM::get_db();
         $stmt = $pdo->prepare(
             "SELECT t.id, t.title, t.content, t.user_id, t.created_at, u.name AS user_name
@@ -249,6 +261,8 @@ class Thread extends Post
                 if(!row) {
                     return null;
                 }
+            ＠soya:
+            反映しました
         */
         if (!$row) {
             return null;
@@ -263,18 +277,12 @@ class Thread extends Post
         );
     }
 
-    public static function getResourceCount()
-    {
-        
-    }
     /*
         @kanai:
             スレッド毎のレスポンス件数のプロパティかと思いますが、public だと クラス外から書き換えられる可能性があるため。
             private が望ましいケースだと思います。
             private にしたうえで、他プロパティと同じく getResponseCount を用意するのがよいです。
-    */
-    public $responseCount = 0;
-    /*
-    
+        @soya:
+            メソッド getAllWithResponseCount に統合しました。
     */
 }

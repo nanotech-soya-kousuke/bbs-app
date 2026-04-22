@@ -5,7 +5,12 @@ date_default_timezone_set('Asia/Tokyo');
 require_once __DIR__ . '/model/Thread.php';
 
 $is_logged_in = isset($_SESSION['user_id']);
-$threads      = Thread::getAllWithStats();
+
+$limit   = 10;
+$page    = max(1, (int)($_GET['page'] ?? 1));
+$offset  = ($page - 1) * $limit;
+
+$threads = Thread::getAllWithResponseCount($limit, $offset);
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -42,10 +47,22 @@ $threads      = Thread::getAllWithStats();
             <p>
                 投稿者: <?= htmlspecialchars($thread->getAuthorName(), ENT_QUOTES, 'UTF-8') ?><br>
                 投稿日時: <?= date('Y/m/d H:i', strtotime($thread->getCreatedAt())) ?><br>
-                コメント数: <?= $thread->responseCount ?>
+                コメント数: <?= $thread->getResponseCount() ?>
             </p>
         </div>
     <?php endforeach; ?>
+
+    <hr>
+
+    <div>
+        <?php if ($page > 1): ?>
+            <a href="?page=<?= $page - 1 ?>">← 前のページ</a>
+        <?php endif; ?>
+
+        <?php if (count($threads) === $limit): ?>
+            <a href="?page=<?= $page + 1 ?>">次のページ →</a>
+        <?php endif; ?>
+    </div>
 
 </body>
 

@@ -18,8 +18,7 @@ class Response extends Post
     public static function validateResponse(string $content): array
     {
         $errors = [];
-        $content = trim($_POST['content'] ?? '');
-        if ($content === '') {
+        if (trim($content) === '') {
             $errors[] = 'コメントを入力してください';
         }
         return $errors;
