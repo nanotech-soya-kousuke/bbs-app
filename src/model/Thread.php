@@ -91,6 +91,22 @@ class Thread extends Post
             Stats が何を表すのかがわからないため、もう少し具体的な名前にしてください。
     
     */
+
+    public function update(string $title, string $content): void
+    {
+        $record = ORM::for_table('threads')->find_one($this->id);
+        if(!$record){
+            throw new RuntimeException('スレッドが見つかりません');
+        }
+        $record->title = $title;
+        $record->content = $content;
+        $record->save();
+
+        $this->title = $title;
+        $this->content = $content;
+
+    }
+
     public static function getAllWithResponseCount(int $limit = 50, int $offset = 0): array
     {
         /*

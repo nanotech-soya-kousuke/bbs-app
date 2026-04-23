@@ -31,4 +31,9 @@ abstract class Post
     {
         return $this->createdAt;
     }
+
+    public function canEdit(int $sessionUserId, bool $isAdmin = false): bool
+    {
+        return $isAdmin || $this->userId === $sessionUserId;
+    }
 }

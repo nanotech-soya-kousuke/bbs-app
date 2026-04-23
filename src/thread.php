@@ -66,10 +66,22 @@ $responses = Response::getByThreadId($thread_id);
     <hr>
 
     <h2><?= htmlspecialchars($thread->getTitle(), ENT_QUOTES, 'UTF-8') ?></h2>
+
+    <?php if ($is_logged_in && $thread->canEdit((int)$_SESSION['user_id'])): ?>
+        <a href="thread_edit.php?id=<?= $thread->getId() ?>">編集</a>
+        <form method="POST" action="delete.php" style="display:inline;" onsubmit="return confirm('このスレッドを削除しますか？')">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="type" value="thread">
+            <input type="hidden" name="id" value="<?= $thread->getId() ?>">
+            <button type="submit">削除</button>
+        </form>
+    <?php endif; ?>
+
     <p>
         投稿者: <?= htmlspecialchars($thread->getAuthorName(), ENT_QUOTES, 'UTF-8') ?><br>
         投稿日時: <?= date('Y/m/d H:i', strtotime($thread->getCreatedAt())) ?>
     </p>
+
     <p><?= nl2br(htmlspecialchars($thread->getContent(), ENT_QUOTES, 'UTF-8')) ?></p>
 
     <hr>
