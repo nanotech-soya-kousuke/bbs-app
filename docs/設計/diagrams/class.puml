@@ -38,18 +38,21 @@ abstract class Post {
 class Thread {
   - title: string
   - userName: string
-  + responseCount: int
-  + create(user, title, content): Thread
+  - responseCount: int
+  + create(userId, title, content): Thread
   + getTitle(): string
-  + getUserName(): string
-  + getAllWithStats(): array
-  + findById(id): self
+  + getAuthorName(): string
+  + getResponseCount(): int
+  + validate(title, content): array
+  + getAllWithResponseCount(limit = 50, offset = 0): array
+  + findById(id): ?self
 }
 
 class Response {
   - userName: string
-  + create(user, threadId ,content): Response
+  + create(userId, threadId ,content): Response
   + getUserName(): string
+  + validateResponse(content): array
   + getByThreadId(threadId, limit = 500): array
 }
 
