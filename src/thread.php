@@ -101,6 +101,17 @@ $responses = Response::getByThreadId($thread_id);
                     <?= date('Y/m/d H:i', strtotime($res->getCreatedAt())) ?>
                 </span>
                 <p><?= nl2br(htmlspecialchars($res->getContent(), ENT_QUOTES, 'UTF-8')) ?></p>
+                <?php if ($is_logged_in && $res->canEdit((int)$_SESSION['user_id'])): ?>
+                    <a href="response_edit.php?id=<?= $res->getId() ?>">編集</a>
+                    <form method="POST" action="delete.php" style="display:inline;"
+                        onsubmit="return confirm('このコメントを削除しますか？')">
+                        <input type="hidden" name="csrf_token"
+                            value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="type" value="response">
+                        <input type="hidden" name="id" value="<?= $res->getId() ?>">
+                        <button type="submit">削除</button>
+                    </form>
+                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     <?php endif; ?>
