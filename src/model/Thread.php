@@ -95,7 +95,7 @@ class Thread extends Post
     public function update(string $title, string $content): void
     {
         $record = ORM::for_table('threads')->find_one($this->id);
-        if(!$record){
+        if (!$record) {
             throw new RuntimeException('スレッドが見つかりません');
         }
         $record->title = $title;
@@ -104,7 +104,14 @@ class Thread extends Post
 
         $this->title = $title;
         $this->content = $content;
+    }
 
+    public function delete(): void
+    {
+        $record = ORM::for_table('threads')->find_one($this->id);
+        if ($record) {
+            $record->delete();
+        }
     }
 
     public static function getAllWithResponseCount(int $limit = 50, int $offset = 0): array
