@@ -7,11 +7,13 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 require_once __DIR__ . '/model/Response.php';
+require_once __DIR__ . '/model/Admin.php';
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+$isAdmin = Admin::isAdmin((int)$_SESSION['user_id']);
 $response_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $response    = $response_id > 0 ? Response::findById($response_id) : null;
 
@@ -22,7 +24,7 @@ if (!$response) {
 
 $thread_id = $response->getThreadId();
 
-if (!$response->canEdit((int)$_SESSION['user_id'])) {
+if (!$response->canEdit((int)$_SESSION['user_id'], $isAdmin)) {
     header('Location: thread.php?id=' . $thread_id);
     exit;
 }

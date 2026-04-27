@@ -36,4 +36,5 @@ abstract class Post
     {
         return $isAdmin || $this->userId === $sessionUserId;
     }
+
 }

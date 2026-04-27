@@ -15,12 +15,18 @@ class User
         $this->password = $password;
     }
 
-    public function save() {
-        // USER Insert
-
+    public function getId(): int
+    {
+        return $this->id;
     }
+
     public function getName()
     {
         return $this->username;
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
     }
 }

@@ -15,12 +15,14 @@ if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $tok
     exit('不正なリクエストです');
 }
 
+$isAdmin = Admin::isAdmin((int)$_SESSION['user_id']);
+
 $type = $_POST['type'] ?? '';
-$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+$id   = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 
 if ($type === 'thread') {
     $thread = Thread::findById($id);
-    if ($thread && $thread->canEdit((int)$_SESSION['user_id'])) {
+    if ($thread && $thread->canEdit((int)$_SESSION['user_id'], $isAdmin)) {
         $thread->delete();
     }
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -28,7 +30,7 @@ if ($type === 'thread') {
     exit;
 } elseif ($type === 'response') {
     $response = Response::findById($id);
-    if ($response && $response->canEdit((int)$_SESSION['user_id'])) {
+    if ($response && $response->canEdit((int)$_SESSION['user_id'], $isAdmin)) {
         $thread_id = $response->getThreadId();
         $response->delete();
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
