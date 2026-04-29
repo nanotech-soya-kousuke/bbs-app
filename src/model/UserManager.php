@@ -40,7 +40,8 @@ class UserManager
         return new User($user->id, 'dummy', $user->email, '');
     }
 
-    public function logout(): void {
+    public function logout(): void
+    {
         $_SESSION = [];
         session_destroy();
         return;
@@ -48,8 +49,7 @@ class UserManager
 
     private function _register($name, $email, $password): User
     {
-        // idiorm を使ってユーザ保存処理
-        return new User(1, $name, $email, $password); // dummy
+        return new User(1, $name, $email, $password);
     }
 
     private function checkValidation($name, $email, $password): array
@@ -74,6 +74,25 @@ class UserManager
             $errors[] = 'パスワードは8文字以上にしてください';
         } elseif (trim($password) === '') {
             $errors[] = '空白のみのパスワードは使用できません';
+        }
+
+        return $errors;
+    }
+
+    public function checkEditValidation(string $name, string $email): array
+    {
+        $errors = [];
+
+        if ($name === '') {
+            $errors[] = 'ユーザー名は必須です';
+        } elseif (preg_match('/^[\s　]+$/u', $name)) {
+            $errors[] = 'ユーザー名は空白のみでは登録できません';
+        }
+
+        if ($email === '') {
+            $errors[] = 'メールアドレスは必須です';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'メールアドレスの形式が不正です';
         }
 
         return $errors;

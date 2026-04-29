@@ -1,16 +1,23 @@
 <?php
 require_once __DIR__ . '/User.php';
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/UserManager.php';
 
 class Admin extends User
 {
     public function updateUser(int $targetUserId, string $name, string $email): void
     {
+        $manager = new UserManager();
+        $errors  = $manager->checkEditValidation($name, $email);
+        if (!empty($errors)) {
+            throw new InvalidArgumentException(implode("\n", $errors));
+        }
+
         $record = ORM::for_table('users')->find_one($targetUserId);
         if (!$record) {
             throw new RuntimeException('ユーザーが見つかりません');
         }
-        $record->name = $name;
+        $record->name  = $name;
         $record->email = $email;
         $record->save();
     }

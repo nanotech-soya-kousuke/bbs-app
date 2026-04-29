@@ -1,7 +1,7 @@
 # bbs-app
 
 ## データベース接続
-docker compose exec db psql -U user -d bbs-app
+docker compose exec db psql -U user -d bbs_app
 
 ## テーブル作成
 ```

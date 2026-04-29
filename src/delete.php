@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 
 require_once __DIR__ . '/model/Thread.php';
 require_once __DIR__ . '/model/Response.php';
+require_once __DIR__ . '/model/Admin.php';
 
 $token = $_POST['csrf_token'] ?? '';
 if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {

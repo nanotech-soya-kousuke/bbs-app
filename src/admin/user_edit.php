@@ -26,23 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $name = trim($_POST['name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
+        $name  = $_POST['name']  ?? '';
+        $email = $_POST['email'] ?? '';
 
-        if ($name === '') {
-            $errors[] = 'ユーザー名を入力してください';
-        }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = '有効なメールアドレスを入力してください';
-        }
-    }
-
-        if (empty($errors)) {
         try {
             $admin->updateUser($target_id, $name, $email);
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             header('Location: users.php');
             exit;
+        } catch (InvalidArgumentException $e) {
+            $errors = explode("\n", $e->getMessage());
         } catch (RuntimeException $e) {
             $errors[] = $e->getMessage();
         }

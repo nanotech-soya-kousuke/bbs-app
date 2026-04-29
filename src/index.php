@@ -3,6 +3,7 @@ session_start();
 date_default_timezone_set('Asia/Tokyo');
 
 require_once __DIR__ . '/model/Thread.php';
+require_once __DIR__ . '/model/Admin.php';
 
 $is_logged_in = isset($_SESSION['user_id']);
 
@@ -27,6 +28,9 @@ $threads = Thread::getAllWithResponseCount($limit, $offset);
     <?php if ($is_logged_in): ?>
         <p>ログイン中</p>
         <a href="/logout.php">ログアウト</a>
+        <?php if (Admin::isAdmin((int)$_SESSION['user_id'])): ?>
+            <a href="/admin/users.php">ユーザー管理</a>
+        <?php endif; ?>
     <?php else: ?>
         <p>ログインしていません</p>
         <a href="/login.php">ログイン</a>

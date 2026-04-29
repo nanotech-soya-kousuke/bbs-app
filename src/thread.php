@@ -4,6 +4,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 require_once __DIR__ . '/model/Thread.php';
 require_once __DIR__ . '/model/Response.php';
+require_once __DIR__ . '/model/Admin.php';
 
 $thread_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($thread_id <= 0) {
@@ -18,6 +19,7 @@ if (!$thread) {
 }
 
 $is_logged_in = isset($_SESSION['user_id']);
+$is_admin = $is_logged_in && Admin::isAdmin((int)$_SESSION['user_id']);
 
 if ($is_logged_in && empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -67,7 +69,7 @@ $responses = Response::getByThreadId($thread_id);
 
     <h2><?= htmlspecialchars($thread->getTitle(), ENT_QUOTES, 'UTF-8') ?></h2>
 
-    <?php if ($is_logged_in && $thread->canEdit((int)$_SESSION['user_id'])): ?>
+    <?php if ($is_logged_in && $thread->canEdit((int)$_SESSION['user_id'], $is_admin)): ?>
         <a href="thread_edit.php?id=<?= $thread->getId() ?>">編集</a>
         <form method="POST" action="delete.php" style="display:inline;" onsubmit="return confirm('このスレッドを削除しますか？')">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
@@ -101,7 +103,7 @@ $responses = Response::getByThreadId($thread_id);
                     <?= date('Y/m/d H:i', strtotime($res->getCreatedAt())) ?>
                 </span>
                 <p><?= nl2br(htmlspecialchars($res->getContent(), ENT_QUOTES, 'UTF-8')) ?></p>
-                <?php if ($is_logged_in && $res->canEdit((int)$_SESSION['user_id'])): ?>
+                <?php if ($is_logged_in && $res->canEdit((int)$_SESSION['user_id'], $is_admin)): ?>
                     <a href="response_edit.php?id=<?= $res->getId() ?>">編集</a>
                     <form method="POST" action="delete.php" style="display:inline;"
                         onsubmit="return confirm('このコメントを削除しますか？')">
