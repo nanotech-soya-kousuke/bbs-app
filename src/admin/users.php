@@ -21,7 +21,7 @@ $users = ORM::for_table('users')->order_by_asc('id')->find_many();
 <body>
 
     <h2>ユーザー管理</h2>
-    <a href="../index.php">← トップに戻る</a>
+    <a href="../../index.php">← トップに戻る</a>
 
     <table border="1" cellpadding="6">
         <tr>

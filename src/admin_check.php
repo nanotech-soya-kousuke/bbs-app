@@ -3,7 +3,7 @@
 require_once __DIR__ . '/model/Admin.php';
 
 if(!isset($_SESSION['user_id'])){
-    header('Location: login.php');
+    header('Location: ../login.php');
     exit;
 }
 
