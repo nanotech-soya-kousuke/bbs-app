@@ -22,14 +22,14 @@ if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $tok
     exit;
 }
 
-if(!in_array($post_type, ['thread','response '], true) || $post_id <= 0) {
+if(!in_array($post_type, ['thread','response'], true) || $post_id <= 0) {
     http_response_code(400);
     echo json_encode(['error' => 'パラメータが不正です']);
     exit;
 }
 
 $added = Reaction::toggle($post_type, $post_id, (int)$_SESSION['user_id'], $type);
-$count = Reaction::countByPost($post_type,$post_id,$type);
+$count = Reaction::countByPost($post_type, $post_id, $type);
 
 echo json_encode([
     'reacted' => $added,

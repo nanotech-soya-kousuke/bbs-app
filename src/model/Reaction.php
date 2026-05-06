@@ -75,7 +75,7 @@ class Reaction
 
         $result = [];
         foreach ($rows as $row) {
-            $key = $postType . '_' . $row['$post_id'];
+            $key = $postType . '_' . $row['post_id'];
             $type = $row['type'];
             if (!isset($result[$key][$type])) {
                 $result[$key][$type] = ['count' => 0, 'reacted' => false];

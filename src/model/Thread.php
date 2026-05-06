@@ -239,4 +239,10 @@ class Thread extends Post
         @soya:
             メソッド getAllWithResponseCount に統合しました。
     */
+
+    public function setResponseCount(int $count): void
+    {
+        $this->responseCount = $count;
+    }
+    
 }
