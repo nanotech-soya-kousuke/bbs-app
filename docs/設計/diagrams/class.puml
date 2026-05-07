@@ -6,19 +6,23 @@ class User {
   - email: string
   - passwordHash: string
   - createdAt: datetime
+  + getId(): int
   + getName(): string
+  + getEmail(): string
 }
 
-class UserManager{
+class UserManager {
   + register(name, email, password): User
   + login(email, password): User
   + logout(): void
   - checkValidation(name, email, password): array
+  + checkEditValidation(name, email): array
 }
 
-class SearchManager{
-  + searchThreadTitle(keyword): Thread[]
-  + searchThreadUser(userName): Thread[]
+class SearchManager {
+  + searchThreadTitle(keyword, limit, offset): Thread[]
+  + searchThreadUser(userName, limit, offset): Thread[]
+  - buildThreads(rows): Thread[]
 }
 
 abstract class Post {
@@ -30,46 +34,60 @@ abstract class Post {
   + getContent(): string
   + getUserId(): int
   + getCreatedAt(): string
-  + update(title, content): void
-  + delete(user): void
-  + addReaction(user, reaction): void
+  + canEdit(sessionUserId, isAdmin): bool
+  + update(content): void
+  + delete(): void
 }
 
 class Thread {
   - title: string
   - userName: string
   - responseCount: int
-  + create(userId, title, content): Thread
   + getTitle(): string
   + getAuthorName(): string
   + getResponseCount(): int
-  + validate(title, content): array
-  + getAllWithResponseCount(limit = 50, offset = 0): array
-  + findById(id): ?self
+  + setResponseCount(count): void
+  + update(title, content): void
+  + delete(): void
+  + {static} create(userId, title, content): Thread
+  + {static} validate(title, content): array
+  + {static} getAllWithResponseCount(limit, offset): Thread[]
+  + {static} findById(id): ?Thread
 }
 
 class Response {
   - userName: string
-  + create(userId, threadId ,content): Response
+  - threadId: int
   + getUserName(): string
-  + validateResponse(content): array
-  + getByThreadId(threadId, limit = 500): array
+  + getThreadId(): int
+  + update(content): void
+  + delete(): void
+  + {static} create(userId, threadId, content): Response
+  + {static} validateResponse(content): array
+  + {static} getByThreadId(threadId, limit): Response[]
+  + {static} findById(id): ?Response
 }
 
 class Admin {
-  + updateUser(user): void
-  + deleteUser(userId): void
+  + updateUser(targetUserId, name, email): void
+  + deleteUser(targetUserId): void
   + updatePost(post, content): void
   + deletePost(post): void
+  + {static} isAdmin(userId): bool
+  + {static} findById(userId): ?Admin
 }
 
 class Reaction {
   - id: int
+  - postType: string
+  - postId: int
+  - userId: int
   - type: string
-  - user: User
-  - post: Post
   - createdAt: datetime
-  + Reaction(user, post, type): Reaction
+  + {static} toggle(postType, postId, userId, type): bool
+  + {static} countByPost(postType, postId, type): int
+  + {static} hasReacted(postType, postId, userId, type): bool
+  + {static} getByPostIds(postType, postIds, userId): array
 }
 
 User ..> Post : 作成
@@ -78,4 +96,6 @@ Thread --|> Post
 Response --|> Post
 Admin --|> User
 UserManager ..> User : 作成
+SearchManager ..> Thread : 検索
+
 @enduml
