@@ -56,6 +56,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $responses = Response::getByThreadId($thread_id);
 
+$num_to_id = [];
+foreach ($responses as $i => $res) {
+    $num_to_id[$i + 1] = $res->getId();
+}
+
+function convertAnchors(string $text, array $numToId): string
+{
+    return preg_replace_callback(
+        '/&gt;&gt;(\d+)/',
+        function ($matches) use ($numToId) {
+            $num = (int)$matches[1];
+            if (!isset($numToId[$num])) {
+                return $matches[0];
+            }
+            return '<a href="#res-' . $numToId[$num] . '" class="anchor">&gt;&gt;' . $num . '</a>';
+        },
+        $text
+    );
+}
+
 $thread_reaction_count = Reaction::countByPost('thread', $thread_id);
 $thread_reacted        = $is_logged_in && Reaction::hasReacted('thread', $thread_id, $session_user_id);
 
@@ -85,6 +105,25 @@ $response_reactions = Reaction::getByPostIds('response', $response_ids, $session
         .reaction-btn:disabled {
             cursor: default;
             opacity: 0.6;
+        }
+
+        .anchor {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .anchor:hover {
+            text-decoration: underline;
+        }
+
+        .res-number {
+            cursor: pointer;
+            color: #0066cc;
+        }
+
+        .res-number:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -132,16 +171,23 @@ $response_reactions = Reaction::getByPostIds('response', $response_ids, $session
             $res_key     = 'response_' . $res->getId();
             $res_count   = $response_reactions[$res_key]['good']['count']   ?? 0;
             $res_reacted = $response_reactions[$res_key]['good']['reacted'] ?? false;
+
+            $escaped_content = nl2br(htmlspecialchars($res->getContent(), ENT_QUOTES, 'UTF-8'));
+            $linked_content  = convertAnchors($escaped_content, $num_to_id);
             ?>
             <div id="res-<?= $res->getId() ?>" style="margin-bottom:16px; padding:8px; border:1px solid #ccc;">
                 <strong>
-                    <?= $i + 1 ?>番:
+                    <?php if ($is_logged_in): ?>
+                        <span class="res-number" data-num="<?= $i + 1 ?>"><?= $i + 1 ?>番</span>:
+                    <?php else: ?>
+                        <?= $i + 1 ?>番:
+                    <?php endif; ?>
                     <?= htmlspecialchars($res->getUserName(), ENT_QUOTES, 'UTF-8') ?>
                 </strong>
                 <span style="color:#888; margin-left:8px;">
                     <?= date('Y/m/d H:i', strtotime($res->getCreatedAt())) ?>
                 </span>
-                <p><?= nl2br(htmlspecialchars($res->getContent(), ENT_QUOTES, 'UTF-8')) ?></p>
+                <p><?= $linked_content ?></p>
 
                 <div class="reaction" data-post-type="response" data-post-id="<?= $res->getId() ?>" data-type="good">
                     <button class="reaction-btn <?= $res_reacted ? 'reacted' : '' ?>"
@@ -181,8 +227,8 @@ $response_reactions = Reaction::getByPostIds('response', $response_ids, $session
         <form method="POST">
             <input type="hidden" name="csrf_token"
                 value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-            <textarea name="content" rows="5" cols="60"
-                placeholder="コメントを入力してください"><?= htmlspecialchars($content, ENT_QUOTES, 'UTF-8') ?></textarea><br><br>
+            <textarea id="comment-input" name="content" rows="5" cols="60"
+                placeholder="コメントを入力してください（>>N でアンカー）"><?= htmlspecialchars($content, ENT_QUOTES, 'UTF-8') ?></textarea><br><br>
             <button type="submit">投稿する</button>
         </form>
 
@@ -192,6 +238,28 @@ $response_reactions = Reaction::getByPostIds('response', $response_ids, $session
 
     <?php if ($is_logged_in): ?>
         <script>
+            document.querySelectorAll('.res-number').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    const num = this.dataset.num;
+                    const textarea = document.getElementById('comment-input');
+                    const anchor = '>>' + num;
+
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    textarea.value =
+                        textarea.value.substring(0, start) +
+                        anchor +
+                        textarea.value.substring(end);
+                    textarea.selectionStart = textarea.selectionEnd = start + anchor.length;
+
+                    textarea.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                    textarea.focus();
+                });
+            });
+
             document.querySelectorAll('.reaction').forEach(function(wrapper) {
                 wrapper.querySelector('.reaction-btn').addEventListener('click', function() {
                     const btn = this;
