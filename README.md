@@ -31,3 +31,14 @@ CREATE TABLE responses (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+```
+CREATE TABLE reactions (
+    id         SERIAL PRIMARY KEY,
+    post_type  VARCHAR(10)  NOT NULL CHECK (post_type IN ('thread', 'response')),
+    post_id    INT          NOT NULL,
+    user_id    INT          NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type       VARCHAR(20)  NOT NULL DEFAULT 'good',
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (post_type, post_id, user_id, type)
+);
+```
