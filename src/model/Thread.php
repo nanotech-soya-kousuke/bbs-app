@@ -92,6 +92,14 @@ class Thread extends Post
     
     */
 
+    /**
+     * @kanai: 
+     * 　#tips
+     *   修正の必要はありませんが、豆知識。
+     * 　この手の追加更新系のメソッドは、更新後のオブジェクトを返す形にすることが多いです。
+     * 　そうすることで、呼び出し側は、更新後のオブジェクトを受け取って、処理を続けることができます。
+     *   return $record, or return $this など。
+     */
     public function update(string $title, string $content): void
     {
         $record = ORM::for_table('threads')->find_one($this->id);
@@ -238,6 +246,13 @@ class Thread extends Post
             private にしたうえで、他プロパティと同じく getResponseCount を用意するのがよいです。
         @soya:
             メソッド getAllWithResponseCount に統合しました。
+        @kanai:
+            #retake
+            setter を用意してしまうと、クラス外からの書き換え可能性を潰せておらず、根本的な解決になっていません。
+            現状、SearchManager でこのメソッドを呼び出していますが、コンストラクタでの初期化に置き換えられないでしょうか。
+
+            オブジェクト指向の原則として、不要な機能、プロパティは外部に公開しないのが望ましいです。
+            遅延初期化が必要であれば、その理由がわかるようにコメントを追加してください。
     */
 
     public function setResponseCount(int $count): void

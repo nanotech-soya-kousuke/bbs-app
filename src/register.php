@@ -46,6 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         $password_hash = password_hash($password_input, PASSWORD_DEFAULT);
 
+        /**
+         * @kanai: #retake
+         *     シーケンス図だと、UserManager クラスで行っている処理になります。
+         * 　　実装・設計が乖離しているので修正してください。
+         */
         try {
             $stmt = $pdo->prepare("
                 INSERT INTO users (name, email, password_hash)

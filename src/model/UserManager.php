@@ -6,6 +6,11 @@ class UserManager
 {
     public function __construct() {}
 
+    /**
+     * @kanai: 
+     * #retake
+     * どこからも呼んでいない処理になっています。不要であれば削除してください。
+    */
     public function register($name, $email, $password): User
     {
         $errors = $this->checkValidation($name, $email, $password);
