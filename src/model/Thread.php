@@ -8,11 +8,12 @@ class Thread extends Post
     private $userName;
     private $responseCount = 0;
 
-    public function __construct($id, $title, $content, $userId, $createdAt, $userName = '')
+    public function __construct($id, $title, $content, $userId, $createdAt, $userName = '', $responseCount = 0)
     {
         parent::__construct($id, $content, $userId, $createdAt);
         $this->title    = $title;
         $this->userName = $userName;
+        $this->responseCount = $responseCount;
     }
 
     public function getTitle(): string
@@ -92,6 +93,15 @@ class Thread extends Post
     
     */
 
+    /**
+     * @kanai: 
+     * 　#tips
+     *   修正の必要はありませんが、豆知識。
+     * 　この手の追加更新系のメソッドは、更新後のオブジェクトを返す形にすることが多いです。
+     * 　そうすることで、呼び出し側は、更新後のオブジェクトを受け取って、処理を続けることができます。
+     *   return $record, or return $this など。
+     */
+
     public function update(string $title, string $content): void
     {
         $record = ORM::for_table('threads')->find_one($this->id);
@@ -156,7 +166,8 @@ class Thread extends Post
                 $row['content'],
                 (int)$row['user_id'],
                 $row['created_at'],
-                $row['user_name']
+                $row['user_name'],
+                (int)$row['response_count']
             );
             $thread->responseCount = (int)$row['response_count'];
             $threads[] = $thread;
@@ -238,11 +249,14 @@ class Thread extends Post
             private にしたうえで、他プロパティと同じく getResponseCount を用意するのがよいです。
         @soya:
             メソッド getAllWithResponseCount に統合しました。
-    */
+        @kanai:
+            #retake
+            setter を用意してしまうと、クラス外からの書き換え可能性を潰せておらず、根本的な解決になっていません。
+            現状、SearchManager でこのメソッドを呼び出していますが、コンストラクタでの初期化に置き換えられないでしょうか。
 
-    public function setResponseCount(int $count): void
-    {
-        $this->responseCount = $count;
-    }
-    
+            オブジェクト指向の原則として、不要な機能、プロパティは外部に公開しないのが望ましいです。
+            遅延初期化が必要であれば、その理由がわかるようにコメントを追加してください。
+        @soya:
+            コンストラクタでの初期化に置き換えました。
+    */
 }

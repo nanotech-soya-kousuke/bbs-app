@@ -1,6 +1,14 @@
 <?php
 require_once __DIR__ . '/Database.php';
 
+/**
+ * @kanai: 
+ * #retake
+ * README に Reaction テーブルの追加SQLの記載がないです。追加してください。
+ * @soya:
+ * 追加しました
+ */
+
 class Reaction
 {
     private $id;

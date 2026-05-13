@@ -7,24 +7,23 @@ class SearchManager
     public function searchThreadTitle(string $keyword, int $limit = 10, int $offset = 0): array
     {
         $rows = ORM::for_table('threads')
-            ->table_alias('t')
-            ->select('t.id')
-            ->select('t.title')
-            ->select('t.content')
-            ->select('t.user_id')
-            ->select('t.created_at')
-            ->select('u.name', 'user_name')
-            ->select_expr('COUNT(r.id)', 'response_count')
-            ->join('users', ['t.user_id', '=', 'u.id'], 'u')
-            ->left_outer_join('responses', ['r.thread_id', '=', 't.id'], 'r')
-            ->where_like('t.title', '%' . $keyword . '%')
-            ->group_by('t.id')
-            ->group_by('t.title')
-            ->group_by('t.content')
-            ->group_by('t.user_id')
-            ->group_by('t.created_at')
-            ->group_by('u.name')
-            ->order_by_desc('t.created_at')
+            ->join('users', ['threads.user_id', '=', 'users.id'])
+            ->left_outer_join('responses', ['responses.thread_id', '=', 'threads.id'])
+            ->select('threads.id')
+            ->select('threads.title')
+            ->select('threads.content')
+            ->select('threads.user_id')
+            ->select('threads.created_at')
+            ->select('users.name', 'user_name')
+            ->select_expr('COUNT(responses.id)', 'response_count')
+            ->where_like('threads.title', '%' . $keyword . '%')
+            ->group_by('threads.id')
+            ->group_by('threads.title')
+            ->group_by('threads.content')
+            ->group_by('threads.user_id')
+            ->group_by('threads.created_at')
+            ->group_by('users.name')
+            ->order_by_desc('threads.created_at')
             ->limit($limit)
             ->offset($offset)
             ->find_array();
@@ -35,24 +34,23 @@ class SearchManager
     public function searchThreadUser(string $userName, int $limit = 10, int $offset = 0): array
     {
         $rows = ORM::for_table('threads')
-            ->table_alias('t')
-            ->select('t.id')
-            ->select('t.title')
-            ->select('t.content')
-            ->select('t.user_id')
-            ->select('t.created_at')
-            ->select('u.name', 'user_name')
-            ->select_expr('COUNT(r.id)', 'response_count')
-            ->join('users', ['t.user_id', '=', 'u.id'], 'u')
-            ->left_outer_join('responses', ['r.thread_id', '=', 't.id'], 'r')
-            ->where_like('u.name', '%' . $userName . '%')
-            ->group_by('t.id')
-            ->group_by('t.title')
-            ->group_by('t.content')
-            ->group_by('t.user_id')
-            ->group_by('t.created_at')
-            ->group_by('u.name')
-            ->order_by_desc('t.created_at')
+            ->join('users', ['threads.user_id', '=', 'users.id'])
+            ->left_outer_join('responses', ['responses.thread_id', '=', 'threads.id'])
+            ->select('threads.id')
+            ->select('threads.title')
+            ->select('threads.content')
+            ->select('threads.user_id')
+            ->select('threads.created_at')
+            ->select('users.name', 'user_name')
+            ->select_expr('COUNT(responses.id)', 'response_count')
+            ->where_like('users.name', '%' . $userName . '%')
+            ->group_by('threads.id')
+            ->group_by('threads.title')
+            ->group_by('threads.content')
+            ->group_by('threads.user_id')
+            ->group_by('threads.created_at')
+            ->group_by('users.name')
+            ->order_by_desc('threads.created_at')
             ->limit($limit)
             ->offset($offset)
             ->find_array();
@@ -64,16 +62,15 @@ class SearchManager
     {
         $threads = [];
         foreach ($rows as $row) {
-            $thread = new Thread(
+            $threads[] = new Thread(
                 (int)$row['id'],
                 $row['title'],
                 $row['content'],
                 (int)$row['user_id'],
                 $row['created_at'],
-                $row['user_name']
+                $row['user_name'],
+                (int)$row['response_count']
             );
-            $thread->setResponseCount((int)$row['response_count']);
-            $threads[] = $thread;
         }
         return $threads;
     }

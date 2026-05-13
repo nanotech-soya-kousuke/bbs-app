@@ -6,8 +6,19 @@ require_once __DIR__ . '/model/Thread.php';
 require_once __DIR__ . '/model/SearchManager.php';
 require_once __DIR__ . '/model/Admin.php';
 
+/*
+ * @kanai: #tips 
+ *        必須というほどでもないですが、この手の多くのパラメータを受け取る必要のある処理では、ファイルの先頭にパラメータのコメントがあると親切です。
+ * 　　　　例えば、$search_type と $search_keyword については、どのような値が入るのか、どのような処理に影響するのかなどをコメントで説明しておくと、コードを読む人が理解しやすくなります。
+ *        以下のようなコメントがあるとよいです。
+ * 
+ * @param string search_type 検索タイプ（'title' または 'user'）
+ * @param string search_keyword 検索キーワード
+ * @param int page 表示するページ番号
+ */
+
 $is_logged_in = isset($_SESSION['user_id']);
-$is_admin     = $is_logged_in && Admin::isAdmin((int)$_SESSION['user_id']);
+$is_admin     = $is_logged_in && (bool)$_SESSION['is_admin'];
 
 $limit  = 10;
 $page   = max(1, (int)($_GET['page'] ?? 1));

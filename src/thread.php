@@ -6,6 +6,7 @@ require_once __DIR__ . '/model/Thread.php';
 require_once __DIR__ . '/model/Response.php';
 require_once __DIR__ . '/model/Reaction.php';
 require_once __DIR__ . '/model/Admin.php';
+require_once __DIR__ . '/model/User.php';
 
 $thread_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($thread_id <= 0) {
@@ -20,8 +21,14 @@ if (!$thread) {
 }
 
 $is_logged_in    = isset($_SESSION['user_id']);
-$is_admin        = $is_logged_in && Admin::isAdmin((int)$_SESSION['user_id']);
 $session_user_id = $is_logged_in ? (int)$_SESSION['user_id'] : 0;
+$current_user = $is_logged_in ? new User(
+    (int)$_SESSION['user_id'],
+    $_SESSION['username'] ?? '',
+    $_SESSION['email']    ?? '',
+    '',
+    (bool)($_SESSION['is_admin'] ?? false)
+) : null;
 
 if ($is_logged_in && empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -135,7 +142,7 @@ $response_reactions = Reaction::getByPostIds('response', $response_ids, $session
 
     <h2><?= htmlspecialchars($thread->getTitle(), ENT_QUOTES, 'UTF-8') ?></h2>
 
-    <?php if ($is_logged_in && $thread->canEdit((int)$_SESSION['user_id'], $is_admin)): ?>
+    <?php if ($current_user && $thread->canEdit($current_user)): ?>
         <a href="thread_edit.php?id=<?= $thread->getId() ?>">編集</a>
         <form method="POST" action="delete.php" style="display:inline;" onsubmit="return confirm('このスレッドを削除しますか？')">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
@@ -196,7 +203,7 @@ $response_reactions = Reaction::getByPostIds('response', $response_ids, $session
                     </button>
                 </div>
 
-                <?php if ($is_logged_in && $res->canEdit((int)$_SESSION['user_id'], $is_admin)): ?>
+                <?php if ($current_user && $res->canEdit($current_user)): ?>
                     <a href="response_edit.php?id=<?= $res->getId() ?>">編集</a>
                     <form method="POST" action="delete.php" style="display:inline;"
                         onsubmit="return confirm('このコメントを削除しますか？')">

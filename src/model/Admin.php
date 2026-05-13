@@ -43,23 +43,33 @@ class Admin extends User
         $post->delete();
     }
 
-    public static function isAdmin(int $userId): bool
-    {
-        $record = ORM::for_table('users')->find_one($userId);
-        return $record && (bool)$record->is_admin;
-    }
+    /**
+     * @kanai: 
+     *  #retake
+     *  static メソッドとして外部からUserId を受け取る形になっています。
+     *  (おそらく、セッションからユーザIDを取得して呼び出す現状の実装の都合かと思います)
+     * 
+     *  これはこれで動作的に問題ないですが、外部から呼び出す場合に、必ず内部的な値であるユーザIDを呼び出し側で把握する必要があり、
+     *  オブジェクト指向的な観点からすると、使いにくいケースがでてきそうです。
+     * 
+     *  is_admin は Userのプロパティになるので、User.isAdmin() とするのが自然かと思います。
+     *   ・Userクラスに isAdmin プロパティを追加
+     * 　　　・初期化のタイミングでisAdminを設定
+     * 　・Userクラスの isAdmin() メソッドでプロパティを返すようにする
+     * 
+     *  @soya:
+     *  isAdminをUserクラスでの処理に変更しました
+     */
 
-    public static function findById(int $userId): ?self
-    {
-        $record = ORM::for_table('users')->find_one($userId);
-        if (!$record || !$record->is_admin) {
-            return null;
-        }
-        return new self(
-            (int)$record->id,
-            $record->name,
-            $record->email,
-            ''
-        );
-    }
+    /**
+     * @kanai: #retake
+     *          ID指定でユーザを検索、取得するメソッドですが、管理者ユーザでなければ null を返す仕様になっています。
+     * 　　　　　この仕様自体は問題ないですが、メソッド名が findById だと、ID指定でユーザを検索する一般的なメソッドのように見えてしまいます。
+     * 　　　　　管理者ユーザでなければ null を返す仕様が分かるようなメソッド名になっているとよさそうです。
+     * 　　　　　findAdminById など。 そうでなければ、最低限メソッドのコメントに仕様の表記があるとよいです。
+     * 
+     * @soya:
+     * findById()を廃止しました
+     * 
+     */
 }
